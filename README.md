@@ -9,3 +9,17 @@
 4、文章主题的展示与获取
 5、不同主题的文章展示
 6.文章内容的查看
+
+
+依赖的开源项目
+Gson
+Android-Universal-Image-Loader
+android-async-http
+
+
+Android Design Support Library的使用
+
+SnackBar
+CoordinatorLayout
+AppBarLayout
+CollapsingToolBarLayout
