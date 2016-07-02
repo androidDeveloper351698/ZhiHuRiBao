@@ -16,4 +16,5 @@ public class Constant {
     public static final String CACHE = "cache";
     public static final int LATEST_COLUMN = Integer.MAX_VALUE;
     public static final int BASE_COLUMN = 100000000;
+    public static final String CONFIG="zhihu_config";
 }
