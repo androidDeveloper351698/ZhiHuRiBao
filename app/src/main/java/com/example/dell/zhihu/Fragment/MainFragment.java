@@ -1,6 +1,8 @@
 package com.example.dell.zhihu.Fragment;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -67,7 +69,6 @@ public class MainFragment extends  BaseFragment {
             public void onScrollStateChanged(AbsListView view, int scrollState) {
 
             }
-
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (mListView != null && mListView.getChildCount() > 0) {
@@ -81,7 +82,6 @@ public class MainFragment extends  BaseFragment {
             }
         });
 
-
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -93,10 +93,8 @@ public class MainFragment extends  BaseFragment {
         });
         return view;
     }
-
-    @Override
-    protected void initData() {
-        super.initData();
+    private void loadLatest(){
+         if(HttpUtil.isNetworkConnected(getActivity())) {
         HttpUtil.get(Constant.LATESTNEWS, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
@@ -105,26 +103,29 @@ public class MainFragment extends  BaseFragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                Gson gson=new Gson();
-                mLatest=gson.fromJson(responseString,Latest.class);
-                mDate=mLatest.getDate();
-                mKanner.setTopBeans(mLatest.getTop_stories());
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        List<StoryBean> storiesEntities = mLatest.getStories();
-                        StoryBean topic = new StoryBean();
-                        topic.setType(Constant.TOPIC);
-                        topic.setTitle("今日热闻");
-                        storiesEntities.add(0, topic);
-                        mAdapter.addList(storiesEntities);
-
-                    }
-                });
-
+                SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getWritableDatabase();
+                db.execSQL("replace into cacheList(date,json) values("+Constant.LATEST_COLUMN+",'"+responseString+"')");
+                db.close();
+                parseLatestJson(responseString);
             }
         });
+        }else{
 
+            SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getReadableDatabase();
+            Cursor cursor=db.rawQuery("select * from cacheList where date = "+Constant.LATEST_COLUMN,null);
+            if(cursor.moveToFirst()){
+                String json=cursor.getString(cursor.getColumnIndex("json"));
+                parseLatestJson(json);
+            }
+            cursor.close();
+            db.close();
+        }
+    }
+
+    @Override
+    protected void initData() {
+        super.initData();
+        loadLatest();
     }
     private void loadBefore(String url){
     if(HttpUtil.isNetworkConnected(getActivity())){
@@ -136,24 +137,57 @@ public class MainFragment extends  BaseFragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                Gson gson=new Gson();
-                mBefore=gson.fromJson(responseString, Before.class);
-                mDate=mBefore.getDate();
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        List<StoryBean> mBeans=mBefore.getStories();
-                        StoryBean storyBean=new StoryBean();
-                        storyBean.setType(Constant.TOPIC);
-                        storyBean.setTitle(convertDate(mDate));
-                        mBeans.add(0,storyBean);
-                        mAdapter.addList(mBeans);
+                SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getWritableDatabase();
+                db.execSQL("replace into cacheList(date,json) values("+mDate+",'"+responseString+"')");
+                db.close();
+                parseBeforeJson(responseString);
+            }
+        });
+    }else{
+        SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getReadableDatabase();
+        Cursor cursor=db.rawQuery("select * from cacheList where date="+mDate+"",null);
+        if(cursor.moveToFirst()){
+            String json=cursor.getString(cursor.getColumnIndex("json"));
+            parseBeforeJson(json);
+        }
+    }
 
-                    }
-                });
+    }
+    public  void parseLatestJson(String json){
+        Gson gson = new Gson();
+        mLatest = gson.fromJson(json, Latest.class);
+        mDate = mLatest.getDate();
+        mKanner.setTopBeans(mLatest.getTop_stories());
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                List<StoryBean> storiesEntities = mLatest.getStories();
+                StoryBean topic = new StoryBean();
+                topic.setType(Constant.TOPIC);
+                topic.setTitle("今日热闻");
+                storiesEntities.add(0, topic);
+                mAdapter.addList(storiesEntities);
+
             }
         });
     }
+
+    public void parseBeforeJson(String json){
+        Gson gson=new Gson();
+        mBefore=gson.fromJson(json, Before.class);
+        mDate=mBefore.getDate();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                List<StoryBean> mBeans=mBefore.getStories();
+                StoryBean storyBean=new StoryBean();
+                storyBean.setType(Constant.TOPIC);
+                storyBean.setTitle(convertDate(mDate));
+                mBeans.add(0,storyBean);
+                mAdapter.addList(mBeans);
+
+            }
+        });
     }
     private String convertDate(String date){
         String result=date.substring(0,4);
@@ -168,3 +202,5 @@ public class MainFragment extends  BaseFragment {
         mAdapter.updateTheme();
     }
 }
+
+

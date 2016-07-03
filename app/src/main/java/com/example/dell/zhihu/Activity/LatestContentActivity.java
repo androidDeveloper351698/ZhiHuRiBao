@@ -1,5 +1,7 @@
 package com.example.dell.zhihu.Activity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -18,6 +20,7 @@ import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
 import com.example.dell.zhihu.Util.SPUtil;
+import com.example.dell.zhihu.db.WebCacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -40,11 +43,13 @@ public class LatestContentActivity extends AppCompatActivity {
     private CollapsingToolbarLayout mCollapsing;
     private Content mContent;
     private boolean isLight;
+    private WebCacheDBHelper mHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.latest_content_layout);
+        mHelper=new WebCacheDBHelper(this,1);
         isLight= SPUtil.newInstance(LatestContentActivity.this).get("isLight");
         story= (StoryBean) getIntent().getSerializableExtra("story");
         mAppBar= (AppBarLayout) findViewById(R.id.latest_appBar);
@@ -86,22 +91,38 @@ public class LatestContentActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    Gson gson=new Gson();
-                    mContent=gson.fromJson(responseString,Content.class);
-                    ImageLoader mImageLoader=ImageLoader.getInstance();
-                    DisplayImageOptions options=new DisplayImageOptions.Builder()
-                            .cacheOnDisk(true)
-                            .cacheInMemory(true)
-                            .build();
-                    mImageLoader.displayImage(mContent.getImage(),mImageView,options);
-                    String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
-                    String html = "<html><head>" + css + "</head><body>" + mContent.getBody() + "</body></html>";
-                    html = html.replace("<div class=\"img-place-holder\">", "");
-                    mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
-
+                    SQLiteDatabase db=mHelper.getWritableDatabase();
+                    responseString = responseString.replaceAll("'", "''");
+                    db.execSQL("replace into contentCache (newsId,json) values("+story.getId()+",'"+responseString+"')");
+                    db.close();
+                    parseJson(responseString);
                 }
             });
         }
+        else {
+                SQLiteDatabase db=mHelper.getReadableDatabase();
+               Cursor cursor= db.rawQuery("select * from contentCache where newsId="+story.getId(),null);
+                if(cursor.moveToFirst()){
+                    String json=cursor.getString(cursor.getColumnIndex("json"));
+                    parseJson(json);
+                }
+            cursor.close();
+            db.close();
+        }
+    }
+    private void parseJson(String json){
+        Gson gson=new Gson();
+        mContent=gson.fromJson(json,Content.class);
+        ImageLoader mImageLoader=ImageLoader.getInstance();
+        DisplayImageOptions options=new DisplayImageOptions.Builder()
+                .cacheOnDisk(true)
+                .cacheInMemory(true)
+                .build();
+        mImageLoader.displayImage(mContent.getImage(),mImageView,options);
+        String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
+        String html = "<html><head>" + css + "</head><body>" + mContent.getBody() + "</body></html>";
+        html = html.replace("<div class=\"img-place-holder\">", "");
+        mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
     }
 
 

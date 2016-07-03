@@ -1,9 +1,10 @@
 package com.example.dell.zhihu.Activity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -15,6 +16,7 @@ import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
+import com.example.dell.zhihu.db.WebCacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 
@@ -30,10 +32,12 @@ public class NewsContentActivity extends AppCompatActivity {
     private WebView mWebView;
     private StoryBean mStory;
     private Content mContent;
+    private WebCacheDBHelper mHelper;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news_content_layout);
+        mHelper=new WebCacheDBHelper(this,1);
         mCoordinator= (CoordinatorLayout) findViewById(R.id.news_content_coordinator);
         mToolbar= (Toolbar) findViewById(R.id.news_content_toolBar);
         mToolbar.setBackgroundColor(getResources().getColor(R.color.light_toolbar));
@@ -62,17 +66,31 @@ public class NewsContentActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    Gson gson=new Gson();
-                    mContent=gson.fromJson(responseString,Content.class);
-                    String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
-                    String html = "<html><head>" + css + "</head><body>" + mContent.getBody() + "</body></html>";
-                    html = html.replace("<div class=\"img-place-holder\">", "");
-                    mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
+                    SQLiteDatabase db=mHelper.getWritableDatabase();
+                    responseString = responseString.replaceAll("'", "''");
+                    db.execSQL("replace into contentCache (newsId,json) values("+mStory.getId()+",'"+responseString+"')");
+                    db.close();
+                    parseJson(responseString);
                 }
             });
         }else {
-            Snackbar.make(mCoordinator,"没有网络连接",Snackbar.LENGTH_LONG).show();
+            SQLiteDatabase db=mHelper.getReadableDatabase();
+            Cursor cursor= db.rawQuery("select * from contentCache where newsId="+mStory.getId(),null);
+            if(cursor.moveToFirst()){
+                String json=cursor.getString(cursor.getColumnIndex("json"));
+                parseJson(json);
+            }
+            cursor.close();
+            db.close();
         }
+    }
+    private void parseJson(String json){
+        Gson gson=new Gson();
+        mContent=gson.fromJson(json,Content.class);
+        String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
+        String html = "<html><head>" + css + "</head><body>" + mContent.getBody() + "</body></html>";
+        html = html.replace("<div class=\"img-place-holder\">", "");
+        mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.example.dell.zhihu.Fragment;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,6 +23,7 @@ import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
+import com.example.dell.zhihu.db.CacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -40,6 +43,7 @@ public class NewsFragment extends Fragment {
     private ImageLoader mImageLoader;
     private News mNews;
     private NewsItemAdapter mAdapter;
+    private CacheDBHelper mHelper;
 
     public static NewsFragment newInstance(String id,String title){
         NewsFragment newsFragment=new NewsFragment();
@@ -56,6 +60,7 @@ public class NewsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mId=getArguments().getString("id");
         mTitle=getArguments().getString("title");
+        mHelper=new CacheDBHelper(getActivity(),1);
     }
 
     @Nullable
@@ -75,7 +80,6 @@ public class NewsFragment extends Fragment {
                 Intent intent=new Intent(getActivity(), NewsContentActivity.class);
                 intent.putExtra("story",story);
                 startActivity(intent);
-
 
             }
         });
@@ -106,19 +110,35 @@ public class NewsFragment extends Fragment {
 
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    Gson gson=new Gson();
-                    mNews=gson.fromJson(responseString, News.class);
-                    DisplayImageOptions options=new DisplayImageOptions.Builder()
-                            .cacheInMemory(true)
-                            .cacheOnDisk(true)
-                            .build();
-                    mTitleTextView.setText(mNews.getDescription());
-                    mImageLoader.displayImage(mNews.getImage(),mTitleImageView,options);
-                    mAdapter=new NewsItemAdapter(getActivity(),mNews.getStories());
-                    mNewsList.setAdapter(mAdapter);
+                    SQLiteDatabase db=mHelper.getWritableDatabase();
+                    db.execSQL("replace into cacheList(date,json) values("+Constant.BASE_COLUMN+",'"+responseString+"')");
+                    db.close();
+                    parseJson(responseString);
                 }
             });
+        }else{
+            SQLiteDatabase db=mHelper.getReadableDatabase();
+            Cursor cursor=db.rawQuery("select * from cacheList where date="+Constant.BASE_COLUMN,null);
+            if(cursor.moveToFirst()){
+                String json=cursor.getString(cursor.getColumnIndex("json"));
+                parseJson(json);
+            }
+            cursor.close();
+            db.close();
         }
+    }
+
+    private void parseJson(String json){
+        Gson gson=new Gson();
+        mNews=gson.fromJson(json, News.class);
+        DisplayImageOptions options=new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+        mTitleTextView.setText(mNews.getDescription());
+        mImageLoader.displayImage(mNews.getImage(),mTitleImageView,options);
+        mAdapter=new NewsItemAdapter(getActivity(),mNews.getStories());
+        mNewsList.setAdapter(mAdapter);
     }
 
     public void updateTheme(){

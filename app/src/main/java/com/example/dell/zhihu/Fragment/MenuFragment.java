@@ -90,36 +90,48 @@ public class MenuFragment extends Fragment {
 
     private void getItems() {
         mItems = new ArrayList<>();
-        HttpUtil.get(Constant.THEMES, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    JSONArray itemsArray = response.getJSONArray("others");
-                    for (int i = 0; i < itemsArray.length(); i++) {
-                        NewsListItems item = new NewsListItems();
-                        JSONObject itemObject = itemsArray.getJSONObject(i);
-                        item.setTitle(itemObject.getString("name"));
-                        item.setId(itemObject.getString("id"));
-                        mItems.add(item);
-                    }
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdapter=new NewsItemsAdapter();
-                            mItemListView.setAdapter(new NewsItemsAdapter());
-                        }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        if(HttpUtil.isNetworkConnected(getActivity())) {
+            HttpUtil.get(Constant.THEMES, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    String json=response.toString();
+                    SPUtil.newInstance(getActivity()).saveString(Constant.THEMES,json);
+                    parseJson(response);
+
                 }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+                }
+            });
+        }else{
+            String json=SPUtil.newInstance(getActivity()).getString(Constant.THEMES);
+            try {
+                JSONObject object=new JSONObject(json);
+                parseJson(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
+        }
+    }
+    public void parseJson(JSONObject json){
+        try {
+            JSONArray itemsArray = json.getJSONArray("others");
+            for (int i = 0; i < itemsArray.length(); i++) {
+                NewsListItems item = new NewsListItems();
+                JSONObject itemObject = itemsArray.getJSONObject(i);
+                item.setTitle(itemObject.getString("name"));
+                item.setId(itemObject.getString("id"));
+                mItems.add(item);
             }
-        });
+                    mAdapter = new NewsItemsAdapter();
+                    mItemListView.setAdapter(new NewsItemsAdapter());
 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 class NewsItemsAdapter extends BaseAdapter{

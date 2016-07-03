@@ -23,14 +23,23 @@ public class SPUtil {
         return mSPUtil;
     }
 
-    public  void save(String key,boolean value){
+    public  void saveBoolean(String key,boolean value){
         mSharedPreferences.edit().putBoolean(key,value).apply();
     }
     public  boolean get(String key){
         return mSharedPreferences.getBoolean(key,true);
     }
+
+    public void saveString(String key,String value){
+        mSharedPreferences.edit().putString(key, value).apply();
+    }
+
+    public String getString(String key){
+        return mSharedPreferences.getString(key,"");
+    }
     public void clear(){
         mSharedPreferences.edit().clear().apply();
     }
+
 
 }

@@ -13,9 +13,11 @@ import android.view.Window;
 import android.widget.FrameLayout;
 
 import com.example.dell.zhihu.Fragment.MainFragment;
+import com.example.dell.zhihu.Fragment.MenuFragment;
 import com.example.dell.zhihu.Fragment.NewsFragment;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.SPUtil;
+import com.example.dell.zhihu.db.CacheDBHelper;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -28,12 +30,14 @@ public class MainActivity extends AppCompatActivity{
     private boolean mIsLight;
     //当前的Fragment
     private static  String curFragment;
+    private CacheDBHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        mDbHelper=new CacheDBHelper(this,1);
         mIsLight=SPUtil.newInstance(MainActivity.this).get("isLight");
         mContent= (FrameLayout) findViewById(R.id.main_content);
        /* MenuFragment fragment=new MenuFragment();
@@ -66,13 +70,13 @@ public class MainActivity extends AppCompatActivity{
                     //点击切换主题
                     case R.id.action_night:
                        mIsLight=!mIsLight;
-                        SPUtil.newInstance(MainActivity.this).save("isLight",mIsLight);
+                        SPUtil.newInstance(MainActivity.this).saveBoolean("isLight",mIsLight);
                         if (curFragment=="latest"){
                             ((MainFragment)getSupportFragmentManager().findFragmentByTag("latest")).updateTheme();
                         }else {
                             ((NewsFragment)getSupportFragmentManager().findFragmentByTag("news")).updateTheme();
                         }
-                        //((MenuFragment)getSupportFragmentManager().findFragmentById(R.id.main_menuFragment)).updateTheme();
+                        ((MenuFragment)getSupportFragmentManager().findFragmentById(R.id.main_menuFragment)).updateTheme();
                         mToolBar.setBackgroundColor(getResources().getColor( mIsLight? R.color.light_toolbar:R.color.dark_toolbar  ));
                         break;
                     case R.id.action_setting:
@@ -118,9 +122,12 @@ public class MainActivity extends AppCompatActivity{
             }
         }
 
-}
 
+}public CacheDBHelper getCacheDBHelper(){
+        return mDbHelper;
+    }
 public static void setCurFragment(){
     curFragment="latest";
 }
 }
+
