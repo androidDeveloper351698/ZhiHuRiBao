@@ -8,11 +8,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.Window;
 import android.widget.FrameLayout;
 
 import com.example.dell.zhihu.Fragment.MainFragment;
+import com.example.dell.zhihu.Fragment.NewsFragment;
 import com.example.dell.zhihu.R;
+import com.example.dell.zhihu.Util.SPUtil;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -22,12 +25,16 @@ public class MainActivity extends AppCompatActivity{
     private  static SwipeRefreshLayout mSwipe;
     private long mFirstTime;
     private FrameLayout mContent;
+    private boolean mIsLight;
+    //当前的Fragment
+    private static  String curFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        mIsLight=SPUtil.newInstance(MainActivity.this).get("isLight");
         mContent= (FrameLayout) findViewById(R.id.main_content);
        /* MenuFragment fragment=new MenuFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.main_menuFragment,fragment).commit();*/
@@ -37,6 +44,7 @@ public class MainActivity extends AppCompatActivity{
         mToolBar.setTitle("知乎日报");
         mToolBar.setNavigationIcon(R.mipmap.ic_drawer_home);
         mToolBar.setTitleTextColor(getResources().getColor(android.R.color.white));
+        mToolBar.setBackgroundColor(getResources().getColor( mIsLight? R.color.light_toolbar:R.color.dark_toolbar  ));
         mDrawerToggle=new ActionBarDrawerToggle(this,mDrawerLayout,mToolBar,R.string.open,R.string.close);
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -51,10 +59,33 @@ public class MainActivity extends AppCompatActivity{
                 mSwipe.setRefreshing(false);
             }
         });
-
+        mToolBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()){
+                    //点击切换主题
+                    case R.id.action_night:
+                       mIsLight=!mIsLight;
+                        SPUtil.newInstance(MainActivity.this).save("isLight",mIsLight);
+                        if (curFragment=="latest"){
+                            ((MainFragment)getSupportFragmentManager().findFragmentByTag("latest")).updateTheme();
+                        }else {
+                            ((NewsFragment)getSupportFragmentManager().findFragmentByTag("news")).updateTheme();
+                        }
+                        //((MenuFragment)getSupportFragmentManager().findFragmentById(R.id.main_menuFragment)).updateTheme();
+                        mToolBar.setBackgroundColor(getResources().getColor( mIsLight? R.color.light_toolbar:R.color.dark_toolbar  ));
+                        break;
+                    case R.id.action_setting:
+                        Snackbar.make(mContent,"点击设置选项",Snackbar.LENGTH_LONG).show();
+                        break;
+                }
+                return true;
+            }
+        });
         getSupportFragmentManager().beginTransaction().
                 replace(R.id.main_content, new MainFragment(), "latest").
                 commit();
+        curFragment="latest";
 
     }
 
@@ -89,4 +120,7 @@ public class MainActivity extends AppCompatActivity{
 
 }
 
+public static void setCurFragment(){
+    curFragment="latest";
+}
 }

@@ -17,6 +17,7 @@ import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
+import com.example.dell.zhihu.Util.SPUtil;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -38,12 +39,13 @@ public class LatestContentActivity extends AppCompatActivity {
     private WebView mWebView;
     private CollapsingToolbarLayout mCollapsing;
     private Content mContent;
+    private boolean isLight;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.latest_content_layout);
-
+        isLight= SPUtil.newInstance(LatestContentActivity.this).get("isLight");
         story= (StoryBean) getIntent().getSerializableExtra("story");
         mAppBar= (AppBarLayout) findViewById(R.id.latest_appBar);
         //mAppBar.setVisibility(View.INVISIBLE);
@@ -59,8 +61,8 @@ public class LatestContentActivity extends AppCompatActivity {
         });
         mCollapsing= (CollapsingToolbarLayout) findViewById(R.id.latest_collapsing);
         mCollapsing.setTitle(story.getTitle());
-        mCollapsing.setContentScrimColor(getResources().getColor(R.color.light_toolbar));
-        mCollapsing.setStatusBarScrimColor(getResources().getColor(R.color.light_toolbar));
+        mCollapsing.setContentScrimColor(getResources().getColor(isLight?R.color.light_toolbar: R.color.dark_toolbar));
+        mCollapsing.setStatusBarScrimColor(getResources().getColor(isLight?R.color.light_toolbar:R.color.dark_toolbar));
 
 
         mImageView= (ImageView) findViewById(R.id.latest_ImageView);
@@ -73,7 +75,7 @@ public class LatestContentActivity extends AppCompatActivity {
         mWebView.getSettings().setDatabaseEnabled(true);
         // 开启Application Cache功能
         mWebView.getSettings().setAppCacheEnabled(true);
-
+        mWebView.setBackgroundColor(getResources().getColor(isLight?R.color.light_news_item:R.color.light_news_topic));
 
         if(HttpUtil.isNetworkConnected(this)){
             HttpUtil.get(Constant.CONTENT + story.getId(), new TextHttpResponseHandler() {
@@ -96,6 +98,7 @@ public class LatestContentActivity extends AppCompatActivity {
                     String html = "<html><head>" + css + "</head><body>" + mContent.getBody() + "</body></html>";
                     html = html.replace("<div class=\"img-place-holder\">", "");
                     mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
+
                 }
             });
         }

@@ -163,4 +163,8 @@ public class MainFragment extends  BaseFragment {
         result+=date.substring(6,8);
         return  result;
     }
+
+    public  void updateTheme(){
+        mAdapter.updateTheme();
+    }
 }

@@ -19,6 +19,7 @@ import com.example.dell.zhihu.Model.NewsListItems;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
+import com.example.dell.zhihu.Util.SPUtil;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.apache.http.Header;
@@ -45,11 +46,14 @@ public class MenuFragment extends Fragment {
     private List<NewsListItems> mItems;
     private Handler mHandler = new Handler();
     private static final String TAG="MenuFragment";
+    private NewsItemsAdapter mAdapter;
+    private boolean isLight;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.i(TAG,"-----------");
+        isLight=SPUtil.newInstance(getActivity()).get("isLight");
         View view = inflater.inflate(R.layout.menu, container, false);
         mStarTextView = (TextView) view.findViewById(R.id.menu_StarTextView);
         mDownloadTextView = (TextView) view.findViewById(R.id.menu_DownloadTextView);
@@ -58,10 +62,17 @@ public class MenuFragment extends Fragment {
         mItemListView = (ListView) view.findViewById(R.id.menu_listView);
         mMenuLinear = (LinearLayout) view.findViewById(R.id.menu_ll);
         getItems();
+        mMenuLinear.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_header : R.color.dark_menu_header));
+        mLoginTextView.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        mStarTextView.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        mDownloadTextView.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        mMainTextView.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_index_background : R.color.dark_menu_index_background));
+        mItemListView.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_listview_background : R.color.dark_menu_listview_background));
         mMainTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.main_content,new MainFragment()).commit();
+                getFragmentManager().beginTransaction().replace(R.id.main_content,new MainFragment(),"latest").commit();
+                MainActivity.setCurFragment();
                 MainActivity.closeMenu();
             }
         });
@@ -70,7 +81,7 @@ public class MenuFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                Log.i(TAG,mItems.get(position).getId()+"-----------"+mItems.get(position).getTitle());
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.main_content,NewsFragment.newInstance(mItems.get(position).getId(),mItems.get(position).getTitle())).commit();
+                        .replace(R.id.main_content,NewsFragment.newInstance(mItems.get(position).getId(),mItems.get(position).getTitle()),"news").commit();
                 MainActivity.closeMenu();
             }
         });
@@ -94,6 +105,7 @@ public class MenuFragment extends Fragment {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            mAdapter=new NewsItemsAdapter();
                             mItemListView.setAdapter(new NewsItemsAdapter());
                         }
                     });
@@ -137,7 +149,19 @@ class NewsItemsAdapter extends BaseAdapter{
         return convertView;
     }
 
+
+
 }
+    public void updateTheme(){
+        isLight= SPUtil.newInstance(getActivity()).get("isLight");
+        mMenuLinear.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_header : R.color.dark_menu_header));
+        mLoginTextView.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        mStarTextView.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        mDownloadTextView.setTextColor(getResources().getColor(isLight ? R.color.light_menu_header_tv : R.color.dark_menu_header_tv));
+        mMainTextView.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_index_background : R.color.dark_menu_index_background));
+        mItemListView.setBackgroundColor(getResources().getColor(isLight ? R.color.light_menu_listview_background : R.color.dark_menu_listview_background));
+        mAdapter.notifyDataSetChanged();
+    }
 
 
 }

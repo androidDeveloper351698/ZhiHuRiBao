@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
+import com.example.dell.zhihu.Util.SPUtil;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -56,6 +57,7 @@ public class NewsItemAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        isLight=SPUtil.newInstance(context).get("isLight");
         ViewHolder viewHolder = null;
         if (convertView == null) {
             viewHolder = new ViewHolder();
@@ -74,8 +76,8 @@ public class NewsItemAdapter extends BaseAdapter {
             viewHolder.tv_title.setTextColor(context.getResources().getColor(isLight ? android.R.color.black : android.R.color.white));
         }*/
 
-        ((LinearLayout) viewHolder.iv_title.getParent().getParent().getParent()).setBackgroundColor(context.getResources().getColor(R.color.light_news_item));
-        ((FrameLayout) viewHolder.tv_title.getParent().getParent()).setBackgroundResource(R.drawable.item_background_selector_light );
+        ((LinearLayout) viewHolder.iv_title.getParent().getParent().getParent()).setBackgroundColor(context.getResources().getColor(isLight?  R.color.light_news_item : R.color.dark_news_item ));
+        ((FrameLayout) viewHolder.tv_title.getParent().getParent()).setBackgroundResource(isLight?  R.drawable.item_background_selector_light:R.drawable.item_background_selector_dark  );
         StoryBean entity = entities.get(position);
         viewHolder.tv_title.setText(entity.getTitle());
         if (entity.getImages() != null) {
@@ -95,6 +97,11 @@ public class NewsItemAdapter extends BaseAdapter {
     public static class ViewHolder {
         TextView tv_title;
         ImageView iv_title;
+    }
+
+    public void updateTheme(){
+        isLight= SPUtil.newInstance(context).get("isLight");
+        notifyDataSetChanged();
     }
 
 }

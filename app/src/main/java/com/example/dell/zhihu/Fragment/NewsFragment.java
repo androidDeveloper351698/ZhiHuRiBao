@@ -120,4 +120,8 @@ public class NewsFragment extends Fragment {
             });
         }
     }
+
+    public void updateTheme(){
+        mAdapter.updateTheme();
+    }
 }

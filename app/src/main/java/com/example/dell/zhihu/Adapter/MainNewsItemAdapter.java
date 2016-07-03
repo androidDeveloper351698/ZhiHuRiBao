@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
+import com.example.dell.zhihu.Util.SPUtil;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -31,6 +32,7 @@ public class MainNewsItemAdapter extends BaseAdapter {
     private ImageLoader mImageloader;
     private DisplayImageOptions options;
     private boolean isLight;
+
 
     public MainNewsItemAdapter(Context context) {
         this.context = context;
@@ -65,6 +67,7 @@ public class MainNewsItemAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        isLight=SPUtil.newInstance(context).get("isLight");
         ViewHolder viewHolder = null;
         if (convertView == null) {
             viewHolder = new ViewHolder();
@@ -77,8 +80,8 @@ public class MainNewsItemAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        ((LinearLayout) viewHolder.iv_title.getParent().getParent().getParent()).setBackgroundColor(context.getResources().getColor(R.color.light_news_item));
-        viewHolder.tv_topic.setTextColor(context.getResources().getColor( R.color.light_news_topic ));
+        ((LinearLayout) viewHolder.iv_title.getParent().getParent().getParent()).setBackgroundColor(context.getResources().getColor(isLight?  R.color.light_news_item :R.color.dark_news_item ));
+        viewHolder.tv_topic.setTextColor(context.getResources().getColor( isLight?  R.color.light_news_topic:R.color.dark_news_topic  ));
         StoryBean entity = beans.get(position);
         if (entity.getType() == Constant.TOPIC) {
             //显示最开始的今日热闻
@@ -88,7 +91,7 @@ public class MainNewsItemAdapter extends BaseAdapter {
             viewHolder.tv_topic.setVisibility(View.VISIBLE);
             viewHolder.tv_topic.setText(entity.getTitle());
         } else {
-            ((FrameLayout) viewHolder.tv_topic.getParent()).setBackgroundResource(R.drawable.item_background_selector_light);
+            ((FrameLayout) viewHolder.tv_topic.getParent()).setBackgroundResource(isLight? R.drawable.item_background_selector_light : R.drawable.item_background_selector_dark );
             viewHolder.tv_topic.setVisibility(View.GONE);
             viewHolder.tv_title.setVisibility(View.VISIBLE);
             viewHolder.iv_title.setVisibility(View.VISIBLE);
@@ -103,6 +106,12 @@ public class MainNewsItemAdapter extends BaseAdapter {
         TextView tv_topic;
         TextView tv_title;
         ImageView iv_title;
+    }
+
+    //更新主题的方法
+    public void updateTheme(){
+        isLight= SPUtil.newInstance(context).get("isLight");
+        notifyDataSetChanged();
     }
 
 }
