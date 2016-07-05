@@ -7,6 +7,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.Window;
@@ -18,6 +19,7 @@ import com.example.dell.zhihu.Fragment.NewsFragment;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.SPUtil;
 import com.example.dell.zhihu.db.CacheDBHelper;
+import com.orhanobut.logger.Logger;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -37,6 +39,11 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        Logger.init("MainActivity");
+        Log.i("MainActivity","Hello World!");
+        Log.d("MainActivity","===============");
+        Logger.i("Hello world");
+        Logger.d("Hello-----------------");
         mDbHelper=new CacheDBHelper(this,1);
         mIsLight=SPUtil.newInstance(MainActivity.this).get("isLight");
         mContent= (FrameLayout) findViewById(R.id.main_content);

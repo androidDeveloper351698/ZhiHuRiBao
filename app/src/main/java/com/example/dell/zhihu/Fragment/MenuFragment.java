@@ -21,6 +21,7 @@ import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
 import com.example.dell.zhihu.Util.SPUtil;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.orhanobut.logger.Logger;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -53,6 +54,7 @@ public class MenuFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.i(TAG,"-----------");
+        Logger.init("MyApplication");
         isLight=SPUtil.newInstance(getActivity()).get("isLight");
         View view = inflater.inflate(R.layout.menu, container, false);
         mStarTextView = (TextView) view.findViewById(R.id.menu_StarTextView);
@@ -94,6 +96,7 @@ public class MenuFragment extends Fragment {
             HttpUtil.get(Constant.THEMES, new JsonHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
                     String json=response.toString();
                     SPUtil.newInstance(getActivity()).saveString(Constant.THEMES,json);
                     parseJson(response);

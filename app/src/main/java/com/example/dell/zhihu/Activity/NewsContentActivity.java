@@ -16,7 +16,7 @@ import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
-import com.example.dell.zhihu.db.WebCacheDBHelper;
+import com.example.dell.zhihu.db.CacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 
@@ -32,12 +32,12 @@ public class NewsContentActivity extends AppCompatActivity {
     private WebView mWebView;
     private StoryBean mStory;
     private Content mContent;
-    private WebCacheDBHelper mHelper;
+    private CacheDBHelper mHelper;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news_content_layout);
-        mHelper=new WebCacheDBHelper(this,1);
+        mHelper=new CacheDBHelper(this,1);
         mCoordinator= (CoordinatorLayout) findViewById(R.id.news_content_coordinator);
         mToolbar= (Toolbar) findViewById(R.id.news_content_toolBar);
         mToolbar.setBackgroundColor(getResources().getColor(R.color.light_toolbar));

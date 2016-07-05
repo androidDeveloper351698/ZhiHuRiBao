@@ -111,14 +111,14 @@ public class NewsFragment extends Fragment {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, String responseString) {
                     SQLiteDatabase db=mHelper.getWritableDatabase();
-                    db.execSQL("replace into cacheList(date,json) values("+Constant.BASE_COLUMN+",'"+responseString+"')");
+                    db.execSQL("replace into cacheList(date,json) values("+mId+",'"+responseString+"')");
                     db.close();
                     parseJson(responseString);
                 }
             });
         }else{
             SQLiteDatabase db=mHelper.getReadableDatabase();
-            Cursor cursor=db.rawQuery("select * from cacheList where date="+Constant.BASE_COLUMN,null);
+            Cursor cursor=db.rawQuery("select * from cacheList where date="+mId,null);
             if(cursor.moveToFirst()){
                 String json=cursor.getString(cursor.getColumnIndex("json"));
                 parseJson(json);

@@ -20,7 +20,7 @@ import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
 import com.example.dell.zhihu.Util.SPUtil;
-import com.example.dell.zhihu.db.WebCacheDBHelper;
+import com.example.dell.zhihu.db.CacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -43,13 +43,13 @@ public class LatestContentActivity extends AppCompatActivity {
     private CollapsingToolbarLayout mCollapsing;
     private Content mContent;
     private boolean isLight;
-    private WebCacheDBHelper mHelper;
+    private CacheDBHelper mHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.latest_content_layout);
-        mHelper=new WebCacheDBHelper(this,1);
+        mHelper=new CacheDBHelper(this,1);
         isLight= SPUtil.newInstance(LatestContentActivity.this).get("isLight");
         story= (StoryBean) getIntent().getSerializableExtra("story");
         mAppBar= (AppBarLayout) findViewById(R.id.latest_appBar);

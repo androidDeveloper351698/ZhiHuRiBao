@@ -24,6 +24,7 @@ import com.example.dell.zhihu.Util.HttpUtil;
 import com.example.dell.zhihu.View.Kanner;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
+import com.orhanobut.logger.Logger;
 
 import org.apache.http.Header;
 
@@ -45,6 +46,7 @@ public class MainFragment extends  BaseFragment {
 
     @Override
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View view=inflater.inflate(R.layout.main_news_layout,container,false);
         mListView= (ListView) view.findViewById(R.id.news_ListView);
         View header=inflater.inflate(R.layout.kanner,mListView,false);
@@ -103,6 +105,7 @@ public class MainFragment extends  BaseFragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                Logger.json(responseString);
                 SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getWritableDatabase();
                 db.execSQL("replace into cacheList(date,json) values("+Constant.LATEST_COLUMN+",'"+responseString+"')");
                 db.close();
