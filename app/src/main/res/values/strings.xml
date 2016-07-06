@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ZhiHu</string>
+    <string name="app_name">仿知乎日报</string>
     <string name="image_translucent_bar">Image Translucent Bar Training</string>
     <string name="color_translucent_bar">Color Translucent Bar Training</string>
     <string name="tool_bar">ToolBar Training</string>
