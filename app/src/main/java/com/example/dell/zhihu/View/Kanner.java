@@ -128,6 +128,8 @@ public class Kanner extends FrameLayout implements View.OnClickListener {
             View mViewContent = LayoutInflater.from(mContext).inflate(R.layout.kanner_content_layout, null);
             ImageView mContentImageView = (ImageView) mViewContent.findViewById(R.id.kanner_content_IV);
             TextView mContentTextView = (TextView) mViewContent.findViewById(R.id.kanner_content_title_TV);
+            mContentTextView.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            mContentTextView.getBackground().setAlpha(150);
             if (i == 0) {
                 //最前面的显示最后一张视图
                 mImageLoader.displayImage(mTopStoriesBeans.get(len - 1).getImage(), mContentImageView, mOptions);

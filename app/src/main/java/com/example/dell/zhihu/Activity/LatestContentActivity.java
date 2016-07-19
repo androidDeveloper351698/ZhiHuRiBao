@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -44,6 +46,7 @@ public class LatestContentActivity extends AppCompatActivity {
     private Content mContent;
     private boolean isLight;
     private CacheDBHelper mHelper;
+    private FloatingActionButton mFloatBtn;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,6 +84,7 @@ public class LatestContentActivity extends AppCompatActivity {
         // 开启Application Cache功能
         mWebView.getSettings().setAppCacheEnabled(true);
         mWebView.setBackgroundColor(getResources().getColor(isLight?R.color.light_news_item:R.color.light_news_topic));
+
 
         if(HttpUtil.isNetworkConnected(this)){
             HttpUtil.get(Constant.CONTENT + story.getId(), new TextHttpResponseHandler() {
