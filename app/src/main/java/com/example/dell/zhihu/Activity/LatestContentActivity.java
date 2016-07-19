@@ -85,7 +85,14 @@ public class LatestContentActivity extends AppCompatActivity {
         mWebView.getSettings().setAppCacheEnabled(true);
         mWebView.setBackgroundColor(getResources().getColor(isLight?R.color.light_news_item:R.color.light_news_topic));
 
-
+        mFloatBtn= (FloatingActionButton) findViewById(R.id.latest_content_floatBtn);
+        mFloatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(mCollapsing,"收藏成功",Snackbar.LENGTH_SHORT).show();
+                mFloatBtn.setVisibility(View.INVISIBLE);
+            }
+        });
         if(HttpUtil.isNetworkConnected(this)){
             HttpUtil.get(Constant.CONTENT + story.getId(), new TextHttpResponseHandler() {
                 @Override

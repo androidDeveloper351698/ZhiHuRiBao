@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -33,6 +35,7 @@ public class NewsContentActivity extends AppCompatActivity {
     private StoryBean mStory;
     private Content mContent;
     private CacheDBHelper mHelper;
+    private FloatingActionButton mFloatBtn;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +59,14 @@ public class NewsContentActivity extends AppCompatActivity {
         mWebView.getSettings().setDatabaseEnabled(true);
         mWebView.getSettings().setAppCacheEnabled(true);
         mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+
+        mFloatBtn= (FloatingActionButton) findViewById(R.id.news_content_floatBtn);
+        mFloatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(mWebView,"收藏成功",Snackbar.LENGTH_SHORT).show();
+            }
+        });
 
         if(HttpUtil.isNetworkConnected(NewsContentActivity.this)){
             HttpUtil.get(Constant.CONTENT + mStory.getId(), new TextHttpResponseHandler() {
