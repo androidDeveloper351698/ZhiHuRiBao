@@ -96,6 +96,7 @@ public class MenuFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent=new Intent(getActivity(), StarActivity.class);
                 startActivity(intent);
+                MainActivity.closeMenu();
             }
         });
         return view;

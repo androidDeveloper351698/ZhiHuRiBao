@@ -45,7 +45,7 @@ public class StarActivity extends AppCompatActivity {
         mHelper=new CacheDBHelper(StarActivity.this,2);
         SQLiteDatabase db=mHelper.getReadableDatabase();
         mStars=new ArrayList<>();
-       Cursor cursor= db.rawQuery("select newsType,newsId,newsTitle,newsImage from starList",null);
+       Cursor cursor= db.rawQuery("select newsType,newsId,newsTitle,newsImage from starList order by id desc",null);
         while (cursor.moveToNext()){
             int type=cursor.getInt(cursor.getColumnIndex("newsType"));
             int id=cursor.getInt(cursor.getColumnIndex("newsId"));
