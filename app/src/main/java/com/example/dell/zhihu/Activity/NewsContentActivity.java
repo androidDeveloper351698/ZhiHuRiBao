@@ -18,6 +18,7 @@ import com.example.dell.zhihu.Model.StoryBean;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
+import com.example.dell.zhihu.Util.SPUtil;
 import com.example.dell.zhihu.db.CacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -36,16 +37,23 @@ public class NewsContentActivity extends AppCompatActivity {
     private Content mContent;
     private CacheDBHelper mHelper;
     private FloatingActionButton mFloatBtn;
+    private Boolean mIsStar;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.news_content_layout);
-        mHelper=new CacheDBHelper(this,1);
+        mHelper=new CacheDBHelper(this,2);
         mCoordinator= (CoordinatorLayout) findViewById(R.id.news_content_coordinator);
         mToolbar= (Toolbar) findViewById(R.id.news_content_toolBar);
         mToolbar.setBackgroundColor(getResources().getColor(R.color.light_toolbar));
         mToolbar.setTitle("发现更大的世界");
         mStory= (StoryBean) getIntent().getSerializableExtra("story");
+        mFloatBtn= (FloatingActionButton) findViewById(R.id.news_content_floatBtn);
+        mIsStar=SPUtil.newInstance(NewsContentActivity.this).get(mStory.getId()+"");
+        //如果被收藏
+        if(!mIsStar){
+            mFloatBtn.setVisibility(View.INVISIBLE);
+        }
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -59,12 +67,14 @@ public class NewsContentActivity extends AppCompatActivity {
         mWebView.getSettings().setDatabaseEnabled(true);
         mWebView.getSettings().setAppCacheEnabled(true);
         mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-
-        mFloatBtn= (FloatingActionButton) findViewById(R.id.news_content_floatBtn);
         mFloatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SPUtil.newInstance(NewsContentActivity.this).saveBoolean(mStory.getId()+"",false);
                 Snackbar.make(mWebView,"收藏成功",Snackbar.LENGTH_SHORT).show();
+                mFloatBtn.setVisibility(View.INVISIBLE);
+                SQLiteDatabase db=mHelper.getWritableDatabase();
+                db.execSQL("insert into starList (newsType,newsId,newsTitle,newsImage) values ("+mStory.getType()+","+mStory.getId()+",'"+mStory.getTitle()+"','"+mStory.getImages().get(0)+"')");
             }
         });
 

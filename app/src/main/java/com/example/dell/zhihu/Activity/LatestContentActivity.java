@@ -47,14 +47,21 @@ public class LatestContentActivity extends AppCompatActivity {
     private boolean isLight;
     private CacheDBHelper mHelper;
     private FloatingActionButton mFloatBtn;
+    private Boolean mIsStar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.latest_content_layout);
-        mHelper=new CacheDBHelper(this,1);
+        mHelper=new CacheDBHelper(this,2);
         isLight= SPUtil.newInstance(LatestContentActivity.this).get("isLight");
+        mFloatBtn= (FloatingActionButton) findViewById(R.id.latest_content_floatBtn);
         story= (StoryBean) getIntent().getSerializableExtra("story");
+        mIsStar=SPUtil.newInstance(LatestContentActivity.this).get(story.getId()+"");
+        //如果被收藏
+        if(!mIsStar){
+            mFloatBtn.setVisibility(View.INVISIBLE);
+        }
         mAppBar= (AppBarLayout) findViewById(R.id.latest_appBar);
         //mAppBar.setVisibility(View.INVISIBLE);
         mToolBar= (Toolbar) findViewById(R.id.latest_ToolBar);
@@ -84,13 +91,15 @@ public class LatestContentActivity extends AppCompatActivity {
         // 开启Application Cache功能
         mWebView.getSettings().setAppCacheEnabled(true);
         mWebView.setBackgroundColor(getResources().getColor(isLight?R.color.light_news_item:R.color.light_news_topic));
-
-        mFloatBtn= (FloatingActionButton) findViewById(R.id.latest_content_floatBtn);
         mFloatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SPUtil.newInstance(LatestContentActivity.this).saveBoolean(story.getId()+"",false);
                 Snackbar.make(mCollapsing,"收藏成功",Snackbar.LENGTH_SHORT).show();
                 mFloatBtn.setVisibility(View.INVISIBLE);
+                SQLiteDatabase db=mHelper.getWritableDatabase();
+                db.execSQL("insert into starList (newsType,newsId,newsTitle,newsImage) values ("+story.getType()+","+story.getId()+",'"+story.getTitle()+"','"+story.getImages().get(0)+"')");
+                db.close();
             }
         });
         if(HttpUtil.isNetworkConnected(this)){

@@ -22,10 +22,10 @@
         <activity android:name=".Activity.MainActivity">
         </activity>
         <activity android:name=".Activity.NewsContentActivity">
-
         </activity>
         <activity android:name=".Activity.LatestContentActivity">
-
+        </activity>
+        <activity android:name=".Activity.StarActivity">
         </activity>
     </application>
 

@@ -60,7 +60,7 @@ public class NewsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mId=getArguments().getString("id");
         mTitle=getArguments().getString("title");
-        mHelper=new CacheDBHelper(getActivity(),1);
+        mHelper=new CacheDBHelper(getActivity(),2);
     }
 
     @Nullable

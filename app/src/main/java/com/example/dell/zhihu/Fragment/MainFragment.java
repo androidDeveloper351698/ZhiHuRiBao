@@ -22,6 +22,7 @@ import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
 import com.example.dell.zhihu.Util.HttpUtil;
 import com.example.dell.zhihu.View.Kanner;
+import com.example.dell.zhihu.db.CacheDBHelper;
 import com.google.gson.Gson;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.orhanobut.logger.Logger;
@@ -43,6 +44,7 @@ public class MainFragment extends  BaseFragment {
     private MainNewsItemAdapter mAdapter;
     private String mDate;
     private Before mBefore;
+    private CacheDBHelper mHelper;
 
     @Override
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,6 +53,7 @@ public class MainFragment extends  BaseFragment {
         mListView= (ListView) view.findViewById(R.id.news_ListView);
         View header=inflater.inflate(R.layout.kanner,mListView,false);
         mKanner= (Kanner) header.findViewById(R.id.kanner);
+        mHelper=new CacheDBHelper(getActivity(),2);
      //   mSwipe = (SwipeRefreshLayout) view.findViewById(R.id.main_swipe);
         mKanner.setOnItemClickListener(new Kanner.OnItemClickListener() {
             @Override
@@ -106,7 +109,7 @@ public class MainFragment extends  BaseFragment {
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
                 Logger.json(responseString);
-                SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getWritableDatabase();
+                SQLiteDatabase db=mHelper.getWritableDatabase();
                 db.execSQL("replace into cacheList(date,json) values("+Constant.LATEST_COLUMN+",'"+responseString+"')");
                 db.close();
                 parseLatestJson(responseString);
@@ -140,7 +143,7 @@ public class MainFragment extends  BaseFragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                SQLiteDatabase db=((MainActivity)getActivity()).getCacheDBHelper().getWritableDatabase();
+                SQLiteDatabase db=mHelper.getWritableDatabase();
                 db.execSQL("replace into cacheList(date,json) values("+mDate+",'"+responseString+"')");
                 db.close();
                 parseBeforeJson(responseString);

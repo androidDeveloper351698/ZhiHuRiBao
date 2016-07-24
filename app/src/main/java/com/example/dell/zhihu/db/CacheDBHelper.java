@@ -16,6 +16,7 @@ public class CacheDBHelper extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table if not exists cacheList(id Integer primary key autoincrement,date INTEGER unique,json text)");
         db.execSQL("create table if not exists contentCache(id integer primary key autoincrement,newsId integer unique,json text)");
+        db.execSQL("create table if not exists starList(id integer primary key autoincrement,newsType integer,newsId integer unique,newsTitle text,newsImage text)");
     }
 
     @Override

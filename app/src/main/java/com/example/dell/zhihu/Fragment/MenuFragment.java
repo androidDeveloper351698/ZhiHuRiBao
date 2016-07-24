@@ -1,5 +1,6 @@
 package com.example.dell.zhihu.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.dell.zhihu.Activity.MainActivity;
+import com.example.dell.zhihu.Activity.StarActivity;
 import com.example.dell.zhihu.Model.NewsListItems;
 import com.example.dell.zhihu.R;
 import com.example.dell.zhihu.Util.Constant;
@@ -85,6 +87,15 @@ public class MenuFragment extends Fragment {
                 getFragmentManager().beginTransaction()
                         .replace(R.id.main_content,NewsFragment.newInstance(mItems.get(position).getId(),mItems.get(position).getTitle()),"news").commit();
                 MainActivity.closeMenu();
+            }
+        });
+
+        //点击我的收藏进入收藏页面
+        mStarTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getActivity(), StarActivity.class);
+                startActivity(intent);
             }
         });
         return view;
