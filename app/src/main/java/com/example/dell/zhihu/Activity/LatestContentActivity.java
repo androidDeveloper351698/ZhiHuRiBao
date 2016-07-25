@@ -36,7 +36,6 @@ import org.apache.http.Header;
 public class LatestContentActivity extends AppCompatActivity {
 
     private StoryBean story;
-
     private CoordinatorLayout mCoordinatorLayout;
     private AppBarLayout mAppBar;
     private Toolbar mToolBar;

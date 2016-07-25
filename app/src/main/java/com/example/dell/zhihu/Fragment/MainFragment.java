@@ -29,6 +29,7 @@ import com.orhanobut.logger.Logger;
 
 import org.apache.http.Header;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -58,9 +59,13 @@ public class MainFragment extends  BaseFragment {
         mKanner.setOnItemClickListener(new Kanner.OnItemClickListener() {
             @Override
             public void click(View view, Latest.TopStoriesBean bean) {
+                List<String> mImages=new ArrayList<String>();
+                mImages.add(bean.getImage());
                 StoryBean story=new StoryBean();
                 story.setId(bean.getId());
                 story.setTitle(bean.getTitle());
+                story.setType(bean.getType());
+                story.setImages(mImages);
                 Intent intent=new Intent(getActivity(), LatestContentActivity.class);
                 intent.putExtra("story",story);
                 startActivity(intent);
